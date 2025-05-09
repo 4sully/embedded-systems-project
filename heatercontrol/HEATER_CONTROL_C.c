@@ -6,13 +6,14 @@
 #include "adc_thermocouple.h" //thermocouple reading#
 #include <stdbool.h>
 #include "adc_p1_4.h"
+#include "adc_p1_5.h"
 
 void gpio_init(void)
 {
     // P1.2 = input (call for heat-CFH)
     P1DIR &= ~BIT2;
-    P1REN |= BIT2;
-    P1OUT |= BIT2;
+    //P1REN |= BIT2;
+    //P1OUT |= BIT2;
 
     //P1.3 = input,thermocouple for flame sense
     P1DIR &= ~BIT3;
@@ -55,12 +56,14 @@ void system_startup(void)
 
 void system_run(void)
 {
+    setpoint_init();
     adc_init_p1_4();
     set_status_led(2);//green
     while (P1IN & BIT2)//active cfh
     {
        unsigned int current_temp = adc_read_p1_4();
-       if(current_temp<500){//placeholder idk
+       unsigned int setpoint_val = setpoint_read();
+       if(current_temp < setpoint_val){
         setup_servo_pwm_p2_1(45);
        }
        else{
