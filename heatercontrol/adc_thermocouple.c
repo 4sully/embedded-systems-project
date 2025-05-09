@@ -11,13 +11,15 @@ void thermocouple_init(void)
     ADCCTL0 |= ADCSHT_2 | ADCON;      // ADC ON, sampling time = 16 ADC clocks
     ADCCTL1 |= ADCSHP;                // ADC sample-and-hold pulse mode
     ADCCTL2 &= ~ADCRES;               
-    ADCCTL2 |= ADCRES_3;              // 10-bit conversion results (0-1023)
+    ADCCTL2 |= ADCRES_3;              // 12-bit conversion results
 
     ADCMCTL0 |= ADCINCH_3;            // A3 is input channel
 }
 
 unsigned int thermocouple_read(void)
 {
+    ADCMCTL0 &= ~ADCINCH_15;          // Clear input channel bits
+    ADCMCTL0 |= ADCINCH_3;            // A3 is input channel
     ADCCTL0 |= ADCENC | ADCSC;         // Enable and start conversion
     while (ADCCTL1 & ADCBUSY);          // Wait until conversion is done
     return ADCMEM0;                    // Read result
